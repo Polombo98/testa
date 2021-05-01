@@ -27,12 +27,17 @@ type Props = {
 const HomeScreen: FC<Props> = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [list, setList] = useState<IShop[]>([]);
+  const [err, setErr] = useState('');
   useEffect(() => {
     (async () => {
-      const response = await fetch('http://dev01.thrownomore.no:5001/get_shops')
-      setIsLoading(false);
-      const listResponse = await response.json();
-      setList(listResponse.result);
+      try{
+        const response = await fetch('http://dev01.thrownomore.no:5001/get_shops')
+        setIsLoading(false);
+        const listResponse = await response.json();
+        setList(listResponse.result);
+      } catch (err) {
+        setErr(err);
+      }
     })()
   }, [])
   const navigateToDetail = (id: number, label: string) => navigation.push('Detail', {id, label});
@@ -46,26 +51,29 @@ const HomeScreen: FC<Props> = ({navigation}) => {
         isLoading &&
         <LoaderWrapper />
       }
-      <View style={styles.listWrapper}>
-        {
-          list.map(({distance, id, name, numberOfOffers}, idx) => {
-            const onTilePress = () => navigateToDetail(idx, name);
-            return(
-              <TouchableOpacity key={id} style={styles.listItemWrapper} onPress={onTilePress}>
-                <View style={styles.listItemTextWrapper}>
-                  <Text style={styles.nameOfShop}>{name}</Text>
-                  <Text style={styles.distanceToShop}>{distance}</Text>
-                </View>
-                <View style={styles.chipWrapper}>
-                  <Text style={styles.chipText}>
-                    {numberOfOffers}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )
-          })
-        }
-      </View>
+      {
+        !err &&
+        <View style={styles.listWrapper}>
+          {
+            list.map(({distance, id, name, numberOfOffers}, idx) => {
+              const onTilePress = () => navigateToDetail(idx, name);
+              return(
+                <TouchableOpacity key={id} style={styles.listItemWrapper} onPress={onTilePress}>
+                  <View style={styles.listItemTextWrapper}>
+                    <Text style={styles.nameOfShop}>{name}</Text>
+                    <Text style={styles.distanceToShop}>{distance}</Text>
+                  </View>
+                  <View style={styles.chipWrapper}>
+                    <Text style={styles.chipText}>
+                      {numberOfOffers}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )
+            })
+          }
+        </View>
+      }
     </SafeAreaView>
   )
 }
