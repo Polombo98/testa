@@ -1,0 +1,1 @@
+export const green = '#1d790C';
